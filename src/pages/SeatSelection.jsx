@@ -3,39 +3,43 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Seat from '../components/Seat'
 
 const seatRows = ['A', 'B', 'C', 'D', 'E']
-const seatsPerRow = 8
-const bookedSeats = ['A3', 'B5', 'C2', 'D7', 'E4']
+const seatsPerRow = 6
+const comedyBookedSeats = ['A2', 'B5', 'C3', 'D1', 'E6']
+const concertBookedSeats = ['A3', 'B5', 'C2', 'D7', 'E4']
 const maximumSeats = 6
 
 function SeatSelection() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const [concert, setConcert] = useState(null)
+  const isComedyRoute = location.pathname.startsWith('/seats/comedy/')
+  const [event, setEvent] = useState(null)
   const [selectedSeats, setSelectedSeats] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [limitMessage, setLimitMessage] = useState('')
+  const [imageFailed, setImageFailed] = useState(false)
 
   useEffect(() => {
-    const loadConcert = async () => {
+    const loadEvent = async () => {
       setIsLoading(true)
       setError('')
-      setConcert(null)
+      setEvent(null)
       setSelectedSeats(location.state?.selectedSeats || [])
       setLimitMessage('')
+      setImageFailed(false)
 
       try {
-        const response = await fetch('/concerts.json')
+        const response = await fetch(isComedyRoute ? '/comedy.json' : '/concerts.json')
         if (!response.ok) throw new Error('Unable to load seat information.')
 
-        const concerts = await response.json()
-        const selectedConcert = concerts.find((item) => String(item.id) === String(id))
+        const records = await response.json()
+        const selectedEvent = records.find((item) => String(item.id) === String(id))
 
-        if (!selectedConcert) {
-          setError('not-found')
+        if (!selectedEvent) {
+          setError(isComedyRoute ? 'not-found-comedy' : 'not-found')
         } else {
-          setConcert(selectedConcert)
+          setEvent(selectedEvent)
         }
       } catch {
         setError('load-error')
@@ -44,12 +48,14 @@ function SeatSelection() {
       }
     }
 
-    loadConcert()
-  }, [id, location.state])
+    loadEvent()
+  }, [id, isComedyRoute, location.state])
 
   const allSeats = useMemo(() => (
     seatRows.flatMap((row) => Array.from({ length: seatsPerRow }, (_, index) => `${row}${index + 1}`))
   ), [])
+
+  const bookedSeats = useMemo(() => isComedyRoute ? comedyBookedSeats : concertBookedSeats, [isComedyRoute])
 
   const handleSeatClick = (seatId) => {
     if (bookedSeats.includes(seatId)) return
@@ -84,42 +90,45 @@ function SeatSelection() {
       <div className="seat-page-state container">
         <p className="section-label">Something went wrong</p>
         <h1>Unable to load seat information.</h1>
-        <button type="button" className="secondary-btn" onClick={() => navigate('/concerts')}>Back to Concerts</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate(isComedyRoute ? '/comedy' : '/concerts')}>{isComedyRoute ? 'Back to Comedy' : 'Back to Concerts'}</button>
       </div>
     )
   }
 
-  if (error === 'not-found' || !concert) {
+  if (error === 'not-found-comedy' || error === 'not-found' || !event) {
     return (
       <div className="seat-page-state container">
-        <p className="section-label">404 / Concert</p>
-        <h1>Concert not found.</h1>
-        <button type="button" className="secondary-btn" onClick={() => navigate('/concerts')}>Back to Concerts</button>
+        <p className="section-label">{isComedyRoute ? '404 / Comedy' : '404 / Concert'}</p>
+        <h1>{isComedyRoute ? 'Comedy show not found.' : 'Concert not found.'}</h1>
+        <button type="button" className="secondary-btn" onClick={() => navigate(isComedyRoute ? '/comedy' : '/concerts')}>{isComedyRoute ? 'Back to Comedy' : 'Back to Concerts'}</button>
       </div>
     )
   }
 
-  const totalAmount = selectedSeats.length * concert.price
+  const totalAmount = selectedSeats.length * event.price
+  const eventTitle = event.name || event.eventName || 'Event'
+  const eventPerformer = event.artist || event.performer || ''
+  const bookBackPath = isComedyRoute ? `/comedy/${event.id}` : `/concerts/${event.id}`
 
   return (
     <div className="seat-selection-page">
       <div className="container seat-selection-wrap">
-        <button type="button" className="seat-back-button" onClick={() => navigate(`/concerts/${concert.id}`)}>
-          <span aria-hidden="true">←</span> Back to Concert
+        <button type="button" className="seat-back-button" onClick={() => navigate(bookBackPath)}>
+          <span aria-hidden="true">←</span> {isComedyRoute ? 'Back to Comedy' : 'Back to Concert'}
         </button>
 
         <header className="seat-page-header">
           <p className="section-label">Your live experience</p>
           <h1>Select Your Seats</h1>
-          <p>{concert.name}</p>
-          <span>{concert.date} <b aria-hidden="true">•</b> {concert.time} · {concert.venue}, {concert.city}</span>
+          <p>{eventTitle}</p>
+          <span>{event.date} <b aria-hidden="true">•</b> {event.time} · {event.venue}, {event.city}</span>
         </header>
 
         <div className="seat-selection-layout">
           <section className="seat-map-panel">
             <div className="seat-panel-heading"><div><p className="section-label">Choose your view</p><h2>Pick your seats</h2></div><span>{selectedSeats.length} / {maximumSeats} selected</span></div>
             <div className="stage-display"><span>STAGE</span></div>
-            <div className="seat-map" aria-label="Concert seat map">
+            <div className="seat-map" aria-label={isComedyRoute ? 'Comedy seat map' : 'Concert seat map'}>
               {allSeats.map((seatId) => <Seat key={seatId} seatId={seatId} status={getSeatStatus(seatId)} onClick={handleSeatClick} />)}
             </div>
             <div className="seat-legend">
@@ -132,15 +141,15 @@ function SeatSelection() {
           <aside className="seat-summary-panel">
             <p className="section-label">Your booking</p>
             <h2>Booking Summary</h2>
-            <div className="seat-summary-event"><strong>{concert.name}</strong><span>{concert.artist}</span></div>
+            <div className="seat-summary-event"><strong>{eventTitle}</strong><span>{eventPerformer}</span></div>
             <div className="seat-summary-list">
               <div><span>Selected Seats</span><strong>{selectedSeats.length ? selectedSeats.join(', ') : 'No seats selected'}</strong></div>
-              <div><span>Ticket Price</span><strong>₹{concert.price}</strong></div>
+              <div><span>Ticket Price</span><strong>₹{event.price}</strong></div>
               <div><span>Number of Tickets</span><strong>{selectedSeats.length}</strong></div>
               <div className="seat-total-row"><span>Total</span><strong>₹{totalAmount}</strong></div>
             </div>
             {limitMessage && <p className="seat-limit-message" role="status">{limitMessage}</p>}
-            <button type="button" className="primary-btn seat-continue-button" disabled={selectedSeats.length === 0} onClick={() => navigate('/booking-summary', { state: { concert, selectedSeats } })}>Continue to Booking Summary <span aria-hidden="true">→</span></button>
+            <button type="button" className="primary-btn seat-continue-button" disabled={selectedSeats.length === 0} onClick={() => navigate('/booking-summary', { state: { event, selectedSeats, type: isComedyRoute ? 'comedy' : 'concert' } })}>Continue to Booking Summary <span aria-hidden="true">→</span></button>
             <p className="seat-summary-note">You can select up to {maximumSeats} seats per booking.</p>
           </aside>
         </div>

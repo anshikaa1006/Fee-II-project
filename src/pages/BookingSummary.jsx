@@ -1,12 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
-const bookingFee = 100
-
 function BookingSummary() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const event = state?.event || state?.concert
   const selectedSeats = state?.selectedSeats || []
+  const eventType = String(state?.type || event?.type || 'concert').toLowerCase()
+  const isMovieBooking = eventType === 'movie'
+  const isComedyBooking = eventType === 'comedy'
+  const bookingFee = isComedyBooking ? 50 : 100
 
   if (!event || selectedSeats.length === 0) {
     return (
@@ -18,13 +20,15 @@ function BookingSummary() {
     )
   }
 
-  const eventName = event.eventName || event.name || 'Event'
+  const eventName = event.eventName || event.title || event.name || 'Event'
   const performer = event.performer || event.artist || ''
   const subtotal = event.price * selectedSeats.length
   const total = subtotal + bookingFee
+  const eventLabel = isComedyBooking ? 'COMEDY' : (event.category || event.type || 'Event')
+  const routeBack = isComedyBooking ? `/comedy-seats/${event.id}` : `/seats/${event.id}`
 
   return (
-    <div className="booking-summary-page">
+    <div className={`booking-summary-page ${isMovieBooking ? 'movie-booking-summary' : ''} ${isComedyBooking ? 'comedy-booking-summary' : ''}`}>
       <div className="container booking-summary-wrap">
         <header className="booking-summary-header">
           <p className="section-label">Almost there</p>
@@ -35,9 +39,9 @@ function BookingSummary() {
         <div className="booking-summary-layout">
           <section className="booking-summary-main">
             <article className="summary-event-card">
-              <div className="summary-event-art" aria-hidden="true"><span>{performer ? performer.split(' ').map((word) => word[0]).join('').slice(0, 3) : 'EVT'}</span><small>LIVE EVENT</small></div>
+              <div className="summary-event-art" aria-hidden="true"><span>{performer ? performer.split(' ').map((word) => word[0]).join('').slice(0, 3) : 'EVT'}</span><small>{isComedyBooking ? 'LIVE SHOW' : 'LIVE EVENT'}</small></div>
               <div className="summary-event-details">
-                <p className="section-label">{event.category || event.type || 'Event'}</p>
+                <p className="section-label">{eventLabel}</p>
                 <h2>{eventName}</h2>
                 {performer && <p className="summary-artist">{performer}</p>}
                 <div className="summary-event-meta"><span>{event.date}</span><span>{event.time}</span><span>{event.venue}</span><span>{event.city}</span></div>
@@ -60,8 +64,8 @@ function BookingSummary() {
               <div><span>Booking Fee</span><strong>₹{bookingFee}</strong></div>
               <div className="price-summary-total"><span>Total Amount</span><strong>₹{total}</strong></div>
             </div>
-            <button type="button" className="primary-btn payment-continue-button" onClick={() => navigate('/payment', { state: { event, concert: event, selectedSeats, subtotal, bookingFee, total, type: event.type || 'concert' } })}>Proceed to Payment <span aria-hidden="true">→</span></button>
-            <button type="button" className="summary-back-button" onClick={() => navigate(`/seats/${event.id}`, { state: { selectedSeats } })}>← Back to Seat Selection</button>
+            <button type="button" className="primary-btn payment-continue-button" onClick={() => navigate('/payment', { state: { event, concert: event, selectedSeats, subtotal, bookingFee, total, type: eventType } })}>Proceed to Payment <span aria-hidden="true">→</span></button>
+            <button type="button" className="summary-back-button" onClick={() => navigate(routeBack, { state: { selectedSeats } })}>← Back to Seat Selection</button>
           </aside>
         </div>
       </div>

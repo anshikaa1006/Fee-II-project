@@ -1,0 +1,380 @@
+/* Comedy-specific styles - isolated from Movies and Concert CSS */
+.comedy-page {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 72% 12%, rgba(124, 58, 237, 0.32), transparent 23%),
+    radial-gradient(circle at 28% 76%, rgba(250, 204, 21, 0.10), transparent 18%),
+    var(--background);
+  min-height: 100vh;
+}
+
+.comedy-hero {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(8, 8, 8, 0.96), rgba(21, 16, 30, 0.84)),
+    radial-gradient(circle at 72% 32%, rgba(124, 58, 237, 0.95), transparent 22%),
+    radial-gradient(circle at 84% 70%, rgba(236, 72, 153, 0.8), transparent 16%);
+}
+
+.comedy-hero::before,
+.comedy-hero::after {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  content: '';
+}
+
+.comedy-hero::before {
+  left: -80px;
+  top: -40px;
+  box-shadow: 0 0 60px rgba(250, 204, 21, 0.12), inset 0 0 36px rgba(250, 204, 21, 0.14);
+}
+
+.comedy-hero::after {
+  right: -80px;
+  bottom: -80px;
+  border-color: rgba(59, 130, 246, 0.34);
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.12);
+}
+
+.comedy-hero-wrap {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  align-items: center;
+  gap: 2rem;
+  padding: 4rem 0;
+}
+
+.comedy-hero-copy {
+  max-width: 680px;
+}
+
+.comedy-hero-copy h1 {
+  margin: 1rem 0 1.2rem;
+  font-size: clamp(3.4rem, 7vw, 5.2rem);
+  line-height: 0.93;
+  color: var(--text);
+  letter-spacing: -0.08em;
+}
+
+.comedy-hero-copy h1::after {
+  display: block;
+  width: 120px;
+  height: 4px;
+  margin-top: 1rem;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--yellow, #FACC15), var(--pink, #EC4899), var(--blue, #3B82F6));
+  content: '';
+}
+
+.comedy-hero-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.comedy-hero-subtitle {
+  margin: 1rem 0 0;
+  color: var(--muted);
+}
+
+.comedy-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.86rem;
+  margin-top: 2rem;
+}
+
+.comedy-hero-aside {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comedy-hero-card {
+  width: min(420px, 100%);
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: var(--radius-large);
+  background:
+    linear-gradient(135deg, rgba(124,58,237,0.78), rgba(236,72,153,0.39)),
+    url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 30px 80px rgba(124,58,237,0.34), inset 0 0 80px rgba(0,0,0,0.2);
+  color: var(--text);
+}
+
+.comedy-hero-label {
+  color: #fef3c7;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.comedy-hero-badge {
+  align-self: flex-start;
+  margin-top: 1rem;
+  padding: 0.46rem 0.92rem;
+  border-radius: 999px;
+  background: var(--yellow, #FACC15);
+  color: var(--background);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.comedy-hero-badge.light {
+  margin-left: 0.8rem;
+  background: var(--pink, #EC4899);
+  color: var(--text);
+}
+
+.comedy-hero-number {
+  margin-top: 1.2rem;
+  color: var(--text);
+  font-size: clamp(3rem, 5vw, 4rem);
+  font-weight: 900;
+  font-family: var(--font-display);
+}
+
+.comedy-hero-caption {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.comedy-toolbar {
+  position: relative;
+  z-index: 4;
+  margin-top: -2rem;
+}
+
+.comedy-toolbar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(11, 11, 14, 0.88);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+}
+
+.comedy-search {
+  flex: 0 0 min(380px, 40%);
+}
+
+.comedy-search input,
+.comedy-filter-group select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.78rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: rgba(255,255,255,0.045);
+  color: var(--text);
+}
+
+.comedy-search input::placeholder {
+  color: var(--muted);
+}
+
+.comedy-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.comedy-filter-group select {
+  min-width: 170px;
+}
+
+.comedy-featured,
+.comedy-section {
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+.comedy-featured-grid,
+.comedy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.comedy-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(250, 204, 21, 0.16);
+  border-radius: var(--radius-large);
+  background: rgba(22, 22, 30, 0.7);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.22);
+  transition: transform 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
+}
+
+.comedy-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(250, 204, 21, 0.82);
+  box-shadow: 0 20px 80px rgba(124,58,237,0.34), 0 0 28px rgba(236,72,153,0.2);
+}
+
+.comedy-card-image-wrap {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.comedy-card-image-wrap img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  transition: transform 400ms ease;
+}
+
+.comedy-card:hover .comedy-card-image-wrap img {
+  transform: scale(1.08);
+}
+
+.comedy-card-category {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  padding: 0.38rem 0.62rem;
+  border-radius: 999px;
+  background: var(--yellow, #FACC15);
+  color: var(--background);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.comedy-card-content {
+  padding: 1.35rem;
+}
+
+.comedy-card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.comedy-card-name {
+  color: var(--text);
+  font-size: 1.21rem;
+  font-weight: 800;
+}
+
+.comedy-card-performer {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.comedy-card-meta,
+.comedy-card-venue {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.comedy-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.comedy-card-bottom small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.comedy-price {
+  color: var(--yellow, #FACC15);
+  font-weight: 800;
+}
+
+.comedy-card-actions {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.comedy-card-actions .comedy-book-button,
+.comedy-card-actions .comedy-details-button {
+  flex: 1;
+}
+
+.comedy-list-empty,
+.comedy-listing-error,
+.comedy-listing-loading,
+.comedy-detail-state,
+.comedy-seat-page-state {
+  padding: 2rem 0;
+}
+
+@media (max-width: 1100px) {
+  .comedy-featured-grid,
+  .comedy-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .comedy-hero-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .comedy-toolbar-wrap {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .comedy-featured-grid,
+  .comedy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comedy-hero {
+    min-height: auto;
+  }
+
+  .comedy-toolbar-wrap {
+    align-items: stretch;
+  }
+
+  .comedy-search,
+  .comedy-filter-group {
+    flex-basis: 100%;
+  }
+}

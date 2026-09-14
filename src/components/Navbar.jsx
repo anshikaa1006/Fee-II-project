@@ -5,8 +5,7 @@ const navigationLinks = [
   { label: 'Home', to: '/' },
   { label: 'Movies', to: '/movies' },
   { label: 'Concerts', to: '/concerts' },
-  { label: 'Sports', to: '/sports' },
-  { label: 'Comedy & Theatre', to: '/comedy' },
+  { label: 'Comedy', to: '/comedy' },
   { label: 'My Tickets', to: '/my-tickets' },
   { label: 'Login', to: '/login' },
 ]

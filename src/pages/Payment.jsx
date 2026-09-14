@@ -127,7 +127,7 @@ function Payment() {
           <aside className="payment-order-summary">
             <p className="section-label">Your order</p>
             <h2>Order Summary</h2>
-            <div className="payment-event-summary"><strong>{event.eventName || event.name || 'Event'}</strong>{(event.performer || event.artist) && <span>{event.performer || event.artist}</span>}<small>{event.date} · {event.time}</small><small>{event.venue}, {event.city}</small></div>
+            <div className="payment-event-summary"><strong>{event.title || event.eventName || event.name || 'Event'}</strong>{(event.performer || event.artist) && <span>{event.performer || event.artist}</span>}<small>{event.date} · {event.time}</small><small>{event.venue}, {event.city}</small></div>
             <div className="payment-summary-list">
               <div><span>Selected Seats</span><strong>{selectedSeats.join(', ')}</strong></div>
               <div><span>Ticket Price</span><strong>₹{event.price} × {selectedSeats.length}</strong></div>

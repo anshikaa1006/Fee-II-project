@@ -1,0 +1,41 @@
+[
+  {
+    "id": "c1",
+    "name": "Comedy Night Live",
+    "performer": "Stand-Up Special",
+    "category": "Stand-Up",
+    "date": "2026-10-10",
+    "time": "7:30 PM",
+    "city": "Chandigarh",
+    "venue": "Tagore Theatre",
+    "price": 499,
+    "image": "/images/comedy/comedy1.jpg",
+    "availableSeats": 120
+  },
+  {
+    "id": "c2",
+    "name": "Laugh Out Loud",
+    "performer": "Comedy Special",
+    "category": "Comedy Show",
+    "date": "2026-10-18",
+    "time": "8:00 PM",
+    "city": "Delhi",
+    "venue": "Siri Fort Auditorium",
+    "price": 699,
+    "image": "/images/comedy/comedy2.jpg",
+    "availableSeats": 90
+  },
+  {
+    "id": "c3",
+    "name": "Open Mic Comedy",
+    "performer": "Live Comedians",
+    "category": "Open Mic",
+    "date": "2026-10-25",
+    "time": "6:30 PM",
+    "city": "Mohali",
+    "venue": "City Convention Hall",
+    "price": 399,
+    "image": "/images/comedy/comedy3.jpg",
+    "availableSeats": 150
+  }
+]

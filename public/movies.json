@@ -1,0 +1,91 @@
+[
+  {
+    "id": "avengers-endgame",
+    "title": "Avengers: Endgame",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": "PG-13",
+    "duration": "181 min",
+    "releaseDate": "2019-04-26",
+    "price": 260,
+    "city": "Mumbai",
+    "theatre": "Cinepolis Infinity",
+    "description": "The surviving Avengers assemble for one final, universe-spanning showdown against cosmic forces and the fallout of past choices.",
+    "image": "/images/movies/Avengers_Endgame.jpg"
+  },
+  {
+    "id": "interstellar",
+    "title": "Interstellar",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": "PG-13",
+    "duration": "169 min",
+    "releaseDate": "2014-11-07",
+    "price": 250,
+    "city": "Mumbai",
+    "theatre": "PVR Icon",
+    "description": "A team of explorers ventures across a wormhole in search of a new home for humanity, guided by hope, science, and love.",
+    
+    "image": "/images/movies/interstellar.jpg"
+  },
+  {
+    "id": "spider-man-no-way-home",
+    "title": "Spider-Man: No Way Home",
+    "genre": "Action",
+    "language": "English",
+    "rating": "PG-13",
+    "duration": "148 min",
+    "releaseDate": "2021-12-17",
+    "price": 280,
+    "city": "Delhi",
+    "theatre": "INOX Chanakyapuri",
+    "description": "With the world knowing his identity, Peter Parker seeks help from Doctor Strange and faces multiverse consequences.",
+   
+    "image": "/images/movies/SpiderMan.jpg"
+  },
+  {
+    "id": "jawan",
+    "title": "Jawan",
+    "genre": "Action",
+    "language": "Hindi",
+    "rating": "UA",
+    "duration": "169 min",
+    "releaseDate": "2023-09-07",
+    "price": 240,
+    "city": "Delhi",
+    "theatre": "PVR Rivoli",
+    "description": "A fearless vigilante crosses into dangerous territory as personal duty and public justice collide in a high-stakes mission.",
+    
+    "image": "/images/movies/jawan.jpg"
+  },
+  {
+    "id": "inception",
+    "title": "Inception",
+    "genre": "Thriller",
+    "language": "English",
+    "rating": "PG-13",
+    "duration": "148 min",
+    "releaseDate": "2010-07-16",
+    "price": 230,
+    "city": "Bengaluru",
+    "theatre": "Miraj Cinema",
+    "description": "A thief who steals secrets through dreams is offered a chance to erase his past by planting an idea into a target's mind.",
+   
+    "image": "/images/movies/inception.jpg"
+  },
+  {
+    "id": "3-idiots",
+    "title": "3 Idiots",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": "U",
+    "duration": "170 min",
+    "releaseDate": "2009-12-25",
+    "price": 220,
+    "city": "Bengaluru",
+    "theatre": "Carnival Multiplex",
+    "description": "Three friends reunite after years apart, revisiting their college days, friendship, and the pressure of ambition.",
+    
+    "image": "/images/movies/3idiots.jpg"
+  }
+]

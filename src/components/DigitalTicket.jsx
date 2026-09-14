@@ -4,8 +4,10 @@ function DigitalTicket({ booking, compact = false }) {
   const [imageFailed, setImageFailed] = useState(false)
   const eventName = booking.eventName || booking.name || 'Event'
   const performer = booking.performer || booking.artist || ''
+  const type = String(booking.type || 'event').toLowerCase()
+  const isMovieBooking = type === 'movie'
   const typeLabel = String(booking.type || 'event').toUpperCase()
-  const category = booking.category ? `${typeLabel} · ${booking.category}` : typeLabel
+  const category = isMovieBooking ? 'MOVIE' : (booking.category ? `${typeLabel} · ${booking.category}` : typeLabel)
   const seats = Array.isArray(booking.seats) && booking.seats.length ? booking.seats.join(', ') : 'General admission'
   const artistInitials = performer
     .split(' ')
@@ -14,8 +16,8 @@ function DigitalTicket({ booking, compact = false }) {
     .slice(0, 3) || 'EVT'
 
   return (
-    <article className={`digital-ticket ${compact ? 'digital-ticket-compact' : ''}`}>
-      <div className="ticket-topline"><span>VIBE</span><span>DIGITAL TICKET</span></div>
+    <article className={`digital-ticket ${compact ? 'digital-ticket-compact' : ''} ${isMovieBooking ? 'movie-ticket-card' : ''}`}>
+      <div className="ticket-topline"><span>VIBE</span><span>DIGITAL TICKET</span>{isMovieBooking && <span className="movie-ticket-badge">MOVIE</span>}</div>
       <div className="digital-ticket-main">
         <div className="ticket-event-image">
           {imageFailed || !booking.image ? (

@@ -31,9 +31,9 @@ function Confirmation() {
     return {
       bookingId,
       type: eventType,
-      eventName: event.eventName || event.name || 'Event',
+      eventName: event.title || event.eventName || event.name || 'Event',
       performer: event.performer || event.artist || '',
-      category: event.category || eventType,
+      category: event.category || event.genre || eventType,
       venue: event.venue,
       city: event.city,
       date: event.date,
