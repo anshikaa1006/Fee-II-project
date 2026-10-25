@@ -492,6 +492,18 @@
   color: var(--text);
 }
 
+.movies-empty-state {
+  padding: 2.5rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.movies-empty-state h2 {
+  margin: 0.5rem 0 1rem;
+  color: var(--text);
+}
+
 .movie-details-page {
   min-height: 70vh;
   padding: 3rem 0 5rem;

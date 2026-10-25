@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
 
 const bookingFee = 100
 
@@ -25,6 +26,12 @@ function MovieBookingSummary() {
   return (
     <div className="movie-booking-summary">
       <div className="container movie-booking-summary-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Movies', to: '/movies' },
+          { label: movieName, to: `/movie/${movie.id}` },
+          { label: 'Booking Summary' },
+        ]} />
         <header className="booking-summary-header">
           <p className="section-label">Almost there</p>
           <h1>Booking Summary</h1>

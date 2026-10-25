@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
 import ComedyCard from '../components/ComedyCard'
+import useJsonArray from '../hooks/useJsonArray'
 
 const defaultFilters = {
   query: '',
@@ -8,31 +10,8 @@ const defaultFilters = {
 
 function Comedy() {
   const navigate = useNavigate()
-  const [shows, setShows] = useState([])
   const [search, setSearch] = useState(defaultFilters.query)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  const fetchComedy = async () => {
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch('/comedy.json')
-      if (!response.ok) throw new Error('Unable to load comedy events.')
-
-      const data = await response.json()
-      setShows(Array.isArray(data) ? data : [])
-    } catch (fetchError) {
-      setError(fetchError.message || 'Unable to load comedy events.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchComedy()
-  }, [])
+  const { data: shows, error, loading, retry } = useJsonArray('/comedy.json', 'comedy shows')
 
   const filteredShows = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -55,6 +34,7 @@ function Comedy() {
   if (loading) {
     return (
       <div className="comedy-page">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Comedy' }]} />
         <div className="container comedy-page-wrap">
           <section className="comedy-listing-loading">
             <p className="section-label">Loading comedy</p>
@@ -68,11 +48,13 @@ function Comedy() {
   if (error) {
     return (
       <div className="comedy-page">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Comedy' }]} />
         <div className="container comedy-page-wrap">
           <section className="comedy-listing-error">
             <p className="section-label">Something went wrong</p>
             <h1>Unable to load comedy shows.</h1>
-            <button type="button" className="primary-btn" onClick={fetchComedy}>Try Again</button>
+            <p role="alert">{error}</p>
+            <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
           </section>
         </div>
       </div>
@@ -81,6 +63,7 @@ function Comedy() {
 
   return (
     <div className="comedy-page">
+      <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Comedy' }]} />
       <section className="comedy-hero">
         <div className="container comedy-hero-wrap">
           <div className="comedy-hero-copy">
@@ -113,27 +96,29 @@ function Comedy() {
         </div>
       </section>
 
-      <section className="container comedy-featured">
-        <div className="section-heading-row">
-          <div>
-            <p className="section-label">Trending comedy</p>
-            <h2>Trending Comedy Shows</h2>
+      {shows.length > 0 && (
+        <section className="container comedy-featured">
+          <div className="section-heading-row">
+            <div>
+              <p className="section-label">Trending comedy</p>
+              <h2>Trending Comedy Shows</h2>
+            </div>
+            <span className="comedy-count">{filteredShows.length} results</span>
           </div>
-          <span className="comedy-count">{filteredShows.length} results</span>
-        </div>
 
-        {featured.length > 0 ? (
-          <div className="comedy-featured-grid">
-            {featured.map((show) => <ComedyCard key={show.id} show={show} featured />)}
-          </div>
-        ) : (
-          <div className="comedy-list-empty">
-            <p className="section-label">No results</p>
-            <h2>No trending comedy shows found</h2>
-            <button type="button" className="secondary-btn" onClick={clearFilters}>Clear Filters</button>
-          </div>
-        )}
-      </section>
+          {featured.length > 0 ? (
+            <div className="comedy-featured-grid">
+              {featured.map((show) => <ComedyCard key={show.id} show={show} featured />)}
+            </div>
+          ) : (
+            <div className="comedy-list-empty">
+              <p className="section-label">No results</p>
+              <h2>No trending comedy shows found</h2>
+              <button type="button" className="secondary-btn" onClick={clearFilters}>Clear Filters</button>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="container comedy-section">
         <div className="section-heading-row">
@@ -144,7 +129,12 @@ function Comedy() {
           <span className="comedy-count">{filteredShows.length} results</span>
         </div>
 
-        {filteredShows.length === 0 ? (
+        {shows.length === 0 ? (
+          <div className="comedy-list-empty">
+            <p className="section-label">No events yet</p>
+            <h2>No comedy shows are currently available.</h2>
+          </div>
+        ) : filteredShows.length === 0 ? (
           <div className="comedy-list-empty">
             <p className="section-label">No matches</p>
             <h2>No comedy shows found</h2>

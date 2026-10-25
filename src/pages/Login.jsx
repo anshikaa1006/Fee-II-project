@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import Breadcrumbs from '../components/Breadcrumbs'
+import FormInput from '../components/FormInput'
+import { validateEmail, validateRequired } from '../utils/formValidation'
 
 function Login() {
   const navigate = useNavigate()
@@ -16,16 +17,12 @@ function Login() {
 
   const handleLogin = (event) => {
     event.preventDefault()
-    const nextErrors = {}
-
-    if (!form.name.trim()) nextErrors.name = 'Please enter your name.'
-    if (!form.email.trim()) {
-      nextErrors.email = 'Please enter your email address.'
-    } else if (!emailPattern.test(form.email.trim())) {
-      nextErrors.email = 'Please enter a valid email address.'
+    const nextErrors = {
+      name: validateRequired(form.name, 'your name'),
+      email: validateEmail(form.email),
     }
 
-    if (Object.keys(nextErrors).length > 0) {
+    if (Object.values(nextErrors).some(Boolean)) {
       setErrors(nextErrors)
       return
     }
@@ -51,13 +48,38 @@ function Login() {
     <div className="login-page">
       <div className="login-visual" aria-hidden="true"><span>VIBE</span><strong>Your next<br />moment starts<br /><em>here.</em></strong></div>
       <section className="login-card">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Login' }]} />
         <p className="section-label">Welcome to VIBE</p>
         <h1>Welcome Back</h1>
         <p className="login-subtitle">Sign in to continue booking your favourite events.</p>
 
         <form className="login-form" onSubmit={handleLogin} noValidate>
-          <label className="login-field"><span>Name</span><input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Enter your name" autoComplete="name" aria-invalid={Boolean(errors.name)} />{errors.name && <small>{errors.name}</small>}</label>
-          <label className="login-field"><span>Email</span><input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" autoComplete="email" aria-invalid={Boolean(errors.email)} />{errors.email && <small>{errors.email}</small>}</label>
+          {Object.values(errors).some(Boolean) && (
+            <p className="form-error-summary" role="alert">Please correct the highlighted fields.</p>
+          )}
+          <FormInput
+            className="login-field"
+            label="Name"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            autoComplete="name"
+            error={errors.name}
+            required
+          />
+          <FormInput
+            className="login-field"
+            label="Email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            autoComplete="email"
+            error={errors.email}
+            required
+          />
           <button type="submit" className="primary-btn login-button">Login <span aria-hidden="true">→</span></button>
         </form>
 

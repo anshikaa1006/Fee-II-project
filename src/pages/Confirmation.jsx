@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
 import DigitalTicket from '../components/DigitalTicket'
 
 const createBookingId = () => `VIB${Math.floor(10000 + Math.random() * 90000)}`
@@ -24,6 +25,15 @@ function Confirmation() {
   const bookingFee = state?.bookingFee ?? 100
   const total = state?.total ?? 0
   const paymentMethod = state?.paymentMethod || 'UPI'
+  const normalizedEventType = String(eventType).toLowerCase()
+  const categoryLabel = normalizedEventType === 'movie' ? 'Movies' : normalizedEventType === 'comedy' ? 'Comedy' : 'Concerts'
+  const categoryPath = normalizedEventType === 'movie' ? '/movies' : normalizedEventType === 'comedy' ? '/comedy' : '/concerts'
+  const eventName = event?.title || event?.eventName || event?.name || 'Event'
+  const eventPath = normalizedEventType === 'movie'
+    ? `/movie/${event?.id}`
+    : normalizedEventType === 'comedy'
+      ? `/comedy/${event?.id}`
+      : `/concerts/${event?.id}`
 
   const booking = useMemo(() => {
     if (!event || !selectedSeats || selectedSeats.length === 0) return null
@@ -72,6 +82,12 @@ function Confirmation() {
   return (
     <div className="confirmation-page">
       <div className="container confirmation-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: categoryLabel, to: categoryPath },
+          { label: eventName, to: eventPath },
+          { label: 'Confirmation' },
+        ]} />
         <header className="confirmation-header">
           <div className="confirmation-check" aria-hidden="true">✓</div>
           <p className="section-label">Payment successful</p>

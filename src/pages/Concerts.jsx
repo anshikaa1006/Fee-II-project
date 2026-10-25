@@ -1,43 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import ConcertCard from '../components/ConcertCard'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 
 const genreOptions = ['All', 'K-Pop', 'EDM', 'Pop', 'Rock', 'Hip-Hop', 'International']
 
-const getConcerts = async () => {
-  const response = await fetch('/concerts.json')
-  if (!response.ok) throw new Error('Concert data could not be loaded.')
-  return response.json()
-}
-
 function Concerts() {
-  const [concerts, setConcerts] = useState([])
   const [search, setSearch] = useState('')
   const [genre, setGenre] = useState('All')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [cityFilter, setCityFilter] = useState('All')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  const fetchConcerts = async () => {
-    setIsLoading(true)
-    setError('')
-
-    try {
-      const data = await getConcerts()
-      setConcerts(data)
-    } catch (fetchError) {
-      setError(fetchError.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    getConcerts()
-      .then((data) => setConcerts(data))
-      .catch((fetchError) => setError(fetchError.message))
-      .finally(() => setIsLoading(false))
-  }, [])
+  const { data: concerts, error, loading: isLoading, retry } = useJsonArray('/concerts.json', 'concerts')
 
   const cities = useMemo(() => [...new Set(concerts.map((concert) => concert.city))].sort(), [concerts])
   const categories = useMemo(() => [...new Set(concerts.map((concert) => concert.category))].sort(), [concerts])
@@ -69,6 +42,7 @@ function Concerts() {
 
   return (
     <div className="concerts-page">
+      <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Concerts' }]} />
       <section className="concert-hero">
         <div className="concert-hero-grid" />
         <div className="concert-hero-glow concert-hero-glow-one" />
@@ -89,7 +63,7 @@ function Concerts() {
           </div>
         </div>
         <div className="container concert-stats">
-          <div><strong>{concerts.length || '6'}+</strong><span>Concerts</span></div>
+          <div><strong>{concerts.length}+</strong><span>Concerts</span></div>
           <div><strong>06</strong><span>Multiple Cities</span></div>
           <div><strong>LIVE</strong><span>Experiences</span></div>
         </div>
@@ -136,12 +110,12 @@ function Concerts() {
           <section className="container concert-message-state">
             <p className="section-label">Something went wrong</p>
             <h2>Unable to load concerts.</h2>
-            <p>Check your connection and try again.</p>
-            <button type="button" className="primary-btn" onClick={fetchConcerts}>Try Again</button>
+            <p role="alert">{error}</p>
+            <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
           </section>
         ) : (
           <>
-            <section className="container concert-section-block trending-concerts-block">
+            {featuredConcerts.length > 0 && <section className="container concert-section-block trending-concerts-block">
               <div className="concert-section-title">
                 <p className="section-label">🔥 Trending now</p>
                 <h2>Concerts Everyone Is Talking About</h2>
@@ -149,7 +123,7 @@ function Concerts() {
               <div className="featured-concert-grid">
                 {featuredConcerts.map((concert) => <ConcertCard key={concert.id} concert={concert} featured />)}
               </div>
-            </section>
+            </section>}
 
             {spotlightConcert && (
               <section className="artist-spotlight">
@@ -168,7 +142,12 @@ function Concerts() {
 
             <section id="upcoming-concerts" className="container concert-section-block upcoming-concerts-block">
               <div className="concert-section-title"><p className="section-label">Upcoming concerts</p><h2>Find Your Next Live Experience</h2></div>
-              {filteredConcerts.length > 0 ? (
+              {concerts.length === 0 ? (
+                <div className="concert-message-state concert-empty-state">
+                  <p className="section-label">No events yet</p>
+                  <h2>No concerts are currently available.</h2>
+                </div>
+              ) : filteredConcerts.length > 0 ? (
                 <div className="concert-card-grid">{filteredConcerts.map((concert) => <ConcertCard key={concert.id} concert={concert} />)}</div>
               ) : (
                 <div className="concert-message-state concert-empty-state"><p className="section-label">No matches</p><h2>No concerts found</h2><p>Try changing your search or filters.</p><button type="button" className="secondary-btn" onClick={clearFilters}>Clear Filters</button></div>

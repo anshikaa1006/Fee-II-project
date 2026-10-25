@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 import Seat from '../components/Seat'
 
 const seatRows = ['A', 'B', 'C', 'D', 'E']
@@ -13,43 +15,12 @@ function SeatSelection() {
   const location = useLocation()
   const navigate = useNavigate()
   const isComedyRoute = location.pathname.startsWith('/seats/comedy/')
-  const [event, setEvent] = useState(null)
   const [selectedSeats, setSelectedSeats] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
   const [limitMessage, setLimitMessage] = useState('')
-  const [imageFailed, setImageFailed] = useState(false)
-
-  useEffect(() => {
-    const loadEvent = async () => {
-      setIsLoading(true)
-      setError('')
-      setEvent(null)
-      setSelectedSeats(location.state?.selectedSeats || [])
-      setLimitMessage('')
-      setImageFailed(false)
-
-      try {
-        const response = await fetch(isComedyRoute ? '/comedy.json' : '/concerts.json')
-        if (!response.ok) throw new Error('Unable to load seat information.')
-
-        const records = await response.json()
-        const selectedEvent = records.find((item) => String(item.id) === String(id))
-
-        if (!selectedEvent) {
-          setError(isComedyRoute ? 'not-found-comedy' : 'not-found')
-        } else {
-          setEvent(selectedEvent)
-        }
-      } catch {
-        setError('load-error')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadEvent()
-  }, [id, isComedyRoute, location.state])
+  const dataUrl = isComedyRoute ? '/comedy.json' : '/concerts.json'
+  const resourceName = isComedyRoute ? 'comedy seat information' : 'concert seat information'
+  const { data: records, error, loading, retry } = useJsonArray(dataUrl, resourceName)
+  const event = records?.find((item) => String(item.id) === String(id))
 
   const allSeats = useMemo(() => (
     seatRows.flatMap((row) => Array.from({ length: seatsPerRow }, (_, index) => `${row}${index + 1}`))
@@ -81,21 +52,23 @@ function SeatSelection() {
     return 'available'
   }
 
-  if (isLoading) {
+  if (loading) {
     return <div className="seat-page-state container"><p className="section-label">Please wait</p><h1>Loading seat information...</h1></div>
   }
 
-  if (error === 'load-error') {
+  if (error) {
     return (
       <div className="seat-page-state container">
         <p className="section-label">Something went wrong</p>
         <h1>Unable to load seat information.</h1>
+        <p role="alert">{error}</p>
+        <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
         <button type="button" className="secondary-btn" onClick={() => navigate(isComedyRoute ? '/comedy' : '/concerts')}>{isComedyRoute ? 'Back to Comedy' : 'Back to Concerts'}</button>
       </div>
     )
   }
 
-  if (error === 'not-found-comedy' || error === 'not-found' || !event) {
+  if (!event) {
     return (
       <div className="seat-page-state container">
         <p className="section-label">{isComedyRoute ? '404 / Comedy' : '404 / Concert'}</p>
@@ -109,10 +82,18 @@ function SeatSelection() {
   const eventTitle = event.name || event.eventName || 'Event'
   const eventPerformer = event.artist || event.performer || ''
   const bookBackPath = isComedyRoute ? `/comedy/${event.id}` : `/concerts/${event.id}`
+  const categoryLabel = isComedyRoute ? 'Comedy' : 'Concerts'
+  const categoryPath = isComedyRoute ? '/comedy' : '/concerts'
 
   return (
     <div className="seat-selection-page">
       <div className="container seat-selection-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: categoryLabel, to: categoryPath },
+          { label: eventTitle, to: bookBackPath },
+          { label: 'Select Seats' },
+        ]} />
         <button type="button" className="seat-back-button" onClick={() => navigate(bookBackPath)}>
           <span aria-hidden="true">←</span> {isComedyRoute ? 'Back to Comedy' : 'Back to Concert'}
         </button>

@@ -1,33 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 
 function Movies() {
   const navigate = useNavigate()
-  const [movies, setMovies] = useState([])
   const [query, setQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await fetch('/movies.json')
-        if (!response.ok) throw new Error('Unable to load movie list.')
-
-        const movieData = await response.json()
-        setMovies(movieData)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMovies()
-  }, [])
+  const { data: movies, error, loading, retry } = useJsonArray('/movies.json', 'movies')
 
   const filteredMovies = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase()
 
     return movies.filter((movie) => {
-      const matchesQuery = movie.title.toLowerCase().includes(cleanQuery) || movie.genre.toLowerCase().includes(cleanQuery)
+      const matchesQuery = `${movie.title || ''} ${movie.genre || ''}`.toLowerCase().includes(cleanQuery)
       return matchesQuery
     })
   }, [movies, query])
@@ -35,6 +20,7 @@ function Movies() {
   if (loading) {
     return (
       <div className="movies-page">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Movies' }]} />
         <div className="container movies-loading">
           <p className="section-label">Cinema collection</p>
           <h1>Loading Movies...</h1>
@@ -43,8 +29,23 @@ function Movies() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="movies-page">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Movies' }]} />
+        <div className="container movies-loading">
+          <p className="section-label">Something went wrong</p>
+          <h1>Unable to load movies.</h1>
+          <p role="alert">{error}</p>
+          <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="movies-page">
+      <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Movies' }]} />
       <section className="movies-hero">
         <div className="container movies-hero-wrap">
           <div className="movies-hero-copy">
@@ -92,8 +93,20 @@ function Movies() {
           </div>
           <span className="movies-count">{filteredMovies.length} results</span>
         </div>
-        <div className="movie-grid" id="movie-grid">
-          {filteredMovies.map((movie) => (
+        {movies.length === 0 ? (
+          <div className="movies-empty-state">
+            <p className="section-label">No events yet</p>
+            <h2>No movies are currently available.</h2>
+          </div>
+        ) : filteredMovies.length === 0 ? (
+          <div className="movies-empty-state">
+            <p className="section-label">No matches</p>
+            <h2>No movies match your search.</h2>
+            <button type="button" className="secondary-btn" onClick={() => setQuery('')}>Clear Search</button>
+          </div>
+        ) : (
+          <div className="movie-grid" id="movie-grid">
+            {filteredMovies.map((movie) => (
             <article className="movie-card" key={movie.id}>
               <Link className="movie-poster" to={`/movie/${movie.id}`}>
                 <span className="movie-poster-shadow" />
@@ -119,8 +132,9 @@ function Movies() {
                 </div>
               </div>
             </article>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )
