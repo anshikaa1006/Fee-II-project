@@ -1,58 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 
 function ComedyDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [show, setShow] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [imageFailed, setImageFailed] = useState(false)
+  const [failedImage, setFailedImage] = useState('')
+  const { data: shows, error, loading, retry } = useJsonArray('/comedy.json', 'comedy details')
+  const show = shows?.find((item) => String(item.id) === String(id))
 
-  useEffect(() => {
-    const loadComedy = async () => {
-      setIsLoading(true)
-      setError('')
-      setShow(null)
-      setImageFailed(false)
-
-      try {
-        const response = await fetch('/comedy.json')
-        if (!response.ok) throw new Error('Unable to load comedy details.')
-
-        const shows = await response.json()
-        const selectedShow = shows.find((item) => String(item.id) === String(id))
-
-        if (!selectedShow) {
-          setError('not-found')
-        } else {
-          setShow(selectedShow)
-        }
-      } catch {
-        setError('load-error')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadComedy()
-  }, [id])
-
-  if (isLoading) {
+  if (loading) {
     return <div className="comedy-detail-state container"><p className="section-label">Please wait</p><h1>Loading comedy details...</h1></div>
   }
 
-  if (error === 'load-error') {
+  if (error) {
     return (
       <div className="comedy-detail-state container">
         <p className="section-label">Something went wrong</p>
         <h1>Unable to load comedy details.</h1>
+        <p role="alert">{error}</p>
+        <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
         <button type="button" className="secondary-btn" onClick={() => navigate('/comedy')}>Back to Comedy</button>
       </div>
     )
   }
 
-  if (error === 'not-found' || !show) {
+  if (!show) {
     return (
       <div className="comedy-detail-state container">
         <p className="section-label">404 / Comedy</p>
@@ -67,19 +41,24 @@ function ComedyDetails() {
   return (
     <div className="comedy-detail-page">
       <div className="container comedy-detail-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Comedy', to: '/comedy' },
+          { label: show.name },
+        ]} />
         <button type="button" className="detail-back-button" onClick={() => navigate('/comedy')}>
           <span aria-hidden="true">←</span> Back to Comedy
         </button>
 
         <section className="comedy-detail-hero">
           <div className="comedy-detail-image-wrap">
-            {imageFailed || !show.image ? (
+            {failedImage === show.image || !show.image ? (
               <div className="comedy-detail-fallback" aria-label={`${show.artist} comedy placeholder`}>
                 <strong>{artistInitials}</strong>
                 <span>STAND-UP COMEDY</span>
               </div>
             ) : (
-              <img src={show.image} alt={`${show.artist} at ${show.name}`} onError={() => setImageFailed(true)} />
+              <img src={show.image} alt={`${show.artist} at ${show.name}`} onError={() => setFailedImage(show.image)} />
             )}
             <span className="comedy-detail-category">{show.category}</span>
           </div>

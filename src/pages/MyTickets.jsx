@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
 import DigitalTicket from '../components/DigitalTicket'
 
 const readBookings = () => {
@@ -22,6 +23,7 @@ function MyTickets() {
   return (
     <div className="my-tickets-page">
       <div className="container my-tickets-wrap">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'My Tickets' }]} />
         <header className="my-tickets-header">
           <div><p className="section-label">Your VIBE collection</p><h1>My Tickets</h1><p>Your confirmed VIBE bookings.</p></div>
           {bookings.length > 0 && <button type="button" className="clear-tickets-button" onClick={clearTickets}>Clear All Tickets</button>}

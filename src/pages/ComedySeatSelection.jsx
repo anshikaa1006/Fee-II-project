@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 import Seat from '../components/Seat'
 
 const seatRows = ['A', 'B', 'C', 'D', 'E']
@@ -11,29 +13,10 @@ function ComedySeatSelection() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const [comedy, setComedy] = useState(location.state?.comedy || location.state?.event || null)
   const [selectedSeats, setSelectedSeats] = useState(location.state?.selectedSeats || [])
-  const [isLoading, setIsLoading] = useState(!comedy)
   const [limitMessage, setLimitMessage] = useState('')
-
-  useEffect(() => {
-    const fetchComedy = async () => {
-      if (comedy) return
-
-      try {
-        const response = await fetch('/comedy.json')
-        if (!response.ok) throw new Error('Unable to load comedy seats.')
-
-        const shows = await response.json()
-        const found = shows.find((item) => String(item.id) === String(id))
-        setComedy(found || null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchComedy()
-  }, [id, comedy])
+  const { data: shows, error, loading, retry } = useJsonArray('/comedy.json', 'comedy seat information')
+  const comedy = shows?.find((item) => String(item.id) === String(id))
 
   const allSeats = useMemo(() => (
     seatRows.flatMap((row) => Array.from({ length: seatsPerRow }, (_, index) => `${row}${index + 1}`))
@@ -63,8 +46,20 @@ function ComedySeatSelection() {
     return 'available'
   }
 
-  if (isLoading) {
+  if (loading) {
     return <div className="movie-seat-page-state container"><p className="section-label">Please wait</p><h1>Loading seat information...</h1></div>
+  }
+
+  if (error) {
+    return (
+      <div className="movie-seat-page-state container">
+        <p className="section-label">Something went wrong</p>
+        <h1>Unable to load comedy seat information.</h1>
+        <p role="alert">{error}</p>
+        <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate('/comedy')}>Back to Comedy</button>
+      </div>
+    )
   }
 
   if (!comedy) {
@@ -84,6 +79,12 @@ function ComedySeatSelection() {
   return (
     <div className="movie-seat-page">
       <div className="container movie-seat-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Comedy', to: '/comedy' },
+          { label: comedy.name, to: `/comedy/${comedy.id}` },
+          { label: 'Select Seats' },
+        ]} />
         <button type="button" className="movie-seat-back-button" onClick={() => navigate(`/comedy/${comedy.id}`)}>
           <span aria-hidden="true">←</span> Back to Comedy
         </button>

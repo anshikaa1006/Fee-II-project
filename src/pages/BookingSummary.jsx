@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
 
 function BookingSummary() {
   const { state } = useLocation()
@@ -25,11 +26,28 @@ function BookingSummary() {
   const subtotal = event.price * selectedSeats.length
   const total = subtotal + bookingFee
   const eventLabel = isComedyBooking ? 'COMEDY' : (event.category || event.type || 'Event')
-  const routeBack = isComedyBooking ? `/comedy-seats/${event.id}` : `/seats/${event.id}`
+  const categoryLabel = isMovieBooking ? 'Movies' : isComedyBooking ? 'Comedy' : 'Concerts'
+  const categoryPath = isMovieBooking ? '/movies' : isComedyBooking ? '/comedy' : '/concerts'
+  const eventPath = isMovieBooking
+    ? `/movie/${event.id}`
+    : isComedyBooking
+      ? `/comedy/${event.id}`
+      : `/concerts/${event.id}`
+  const routeBack = isMovieBooking
+    ? `/movie-seats/${event.id}`
+    : isComedyBooking
+      ? `/comedy-seats/${event.id}`
+      : `/seats/${event.id}`
 
   return (
     <div className={`booking-summary-page ${isMovieBooking ? 'movie-booking-summary' : ''} ${isComedyBooking ? 'comedy-booking-summary' : ''}`}>
       <div className="container booking-summary-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: categoryLabel, to: categoryPath },
+          { label: eventName, to: eventPath },
+          { label: 'Booking Summary' },
+        ]} />
         <header className="booking-summary-header">
           <p className="section-label">Almost there</p>
           <h1>Booking Summary</h1>

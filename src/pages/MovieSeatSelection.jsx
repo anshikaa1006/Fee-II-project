@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 
 const seatRows = ['A', 'B', 'C', 'D', 'E']
 const seatsPerRow = 8
@@ -10,29 +12,10 @@ function MovieSeatSelection() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const [movie, setMovie] = useState(location.state?.movie || location.state?.event || null)
   const [selectedSeats, setSelectedSeats] = useState(location.state?.selectedSeats || [])
-  const [isLoading, setIsLoading] = useState(!movie)
   const [limitMessage, setLimitMessage] = useState('')
-
-  useEffect(() => {
-    const fetchMovie = async () => {
-      if (movie) return
-
-      try {
-        const response = await fetch('/movies.json')
-        if (!response.ok) throw new Error('Unable to load movie seats.')
-
-        const movies = await response.json()
-        const found = movies.find((item) => String(item.id) === String(id))
-        setMovie(found || null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchMovie()
-  }, [id, movie])
+  const { data: movies, error, loading, retry } = useJsonArray('/movies.json', 'movie seat information')
+  const movie = movies?.find((item) => String(item.id) === String(id))
 
   const allSeats = useMemo(() => (
     seatRows.flatMap((row) => Array.from({ length: seatsPerRow }, (_, index) => `${row}${index + 1}`))
@@ -62,8 +45,20 @@ function MovieSeatSelection() {
     return 'available'
   }
 
-  if (isLoading) {
+  if (loading) {
     return <div className="movie-seat-page-state container"><p className="section-label">Please wait</p><h1>Loading seat information...</h1></div>
+  }
+
+  if (error) {
+    return (
+      <div className="movie-seat-page-state container">
+        <p className="section-label">Something went wrong</p>
+        <h1>Unable to load movie seat information.</h1>
+        <p role="alert">{error}</p>
+        <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate('/movies')}>Back to Movies</button>
+      </div>
+    )
   }
 
   if (!movie) {
@@ -83,6 +78,12 @@ function MovieSeatSelection() {
   return (
     <div className="movie-seat-page">
       <div className="container movie-seat-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Movies', to: '/movies' },
+          { label: movie.title || movie.name, to: `/movie/${movie.id}` },
+          { label: 'Select Seats' },
+        ]} />
         <button type="button" className="movie-seat-back-button" onClick={() => navigate(`/movie/${movie.id}`)}>
           <span aria-hidden="true">←</span> Back to Movie
         </button>

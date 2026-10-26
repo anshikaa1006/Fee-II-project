@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import FormInput from '../components/FormInput'
+import { validateDemoCode, validateUpiId } from '../utils/formValidation'
 
 const paymentOptions = [
   { value: 'UPI', label: 'UPI', description: 'Pay using your UPI ID' },
-  { value: 'Card', label: 'Credit / Debit Card', description: 'Use a demo card form' },
+  { value: 'Card', label: 'Credit / Debit Card', description: 'Use a fictional demo approval code' },
   { value: 'Cash', label: 'Cash / Pay at Venue', description: 'Pay according to venue policy' },
 ]
 
@@ -11,14 +14,8 @@ function Payment() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const [paymentMethod, setPaymentMethod] = useState('UPI')
-  const [upiId, setUpiId] = useState('')
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    cardHolder: '',
-    expiry: '',
-    cvv: '',
-  })
-  const [error, setError] = useState('')
+  const [values, setValues] = useState({ upiId: '', demoCode: '' })
+  const [errors, setErrors] = useState({})
   const [isProcessing, setIsProcessing] = useState(false)
 
   const event = state?.event || state?.concert
@@ -27,37 +24,44 @@ function Payment() {
   const bookingFee = state?.bookingFee ?? 100
   const total = state?.total ?? 0
   const bookingState = { event, concert: event, selectedSeats, subtotal, bookingFee, total, type: event?.type || state?.type || 'concert' }
+  const eventType = String(state?.type || event?.type || 'concert').toLowerCase()
+  const categoryLabel = eventType === 'movie' ? 'Movies' : eventType === 'comedy' ? 'Comedy' : 'Concerts'
+  const categoryPath = eventType === 'movie' ? '/movies' : eventType === 'comedy' ? '/comedy' : '/concerts'
+  const eventName = event?.title || event?.eventName || event?.name || 'Event'
+  const eventPath = eventType === 'movie'
+    ? `/movie/${event?.id}`
+    : eventType === 'comedy'
+      ? `/comedy/${event?.id}`
+      : `/concerts/${event?.id}`
 
-  const handleCardChange = (event) => {
-    setCardDetails((currentDetails) => ({
-      ...currentDetails,
-      [event.target.name]: event.target.value,
-    }))
+  const summaryPath = eventType === 'movie'
+    ? '/movie-booking-summary'
+    : eventType === 'comedy'
+      ? '/comedy-booking-summary'
+      : '/booking-summary'
+
+  const handleChange = (event) => {
+    const { name, value } = event.target
+    setValues((currentValues) => ({ ...currentValues, [name]: value }))
+    setErrors((currentErrors) => ({ ...currentErrors, [name]: '' }))
   }
 
   const validatePayment = () => {
-    if (paymentMethod === 'UPI' && !upiId.trim()) return 'Please enter your UPI ID.'
-
-    if (paymentMethod === 'Card') {
-      if (!cardDetails.cardNumber.trim()) return 'Please enter your card number.'
-      if (!cardDetails.cardHolder.trim()) return 'Please enter the card holder name.'
-      if (!cardDetails.expiry.trim()) return 'Please enter the expiry date.'
-      if (!cardDetails.cvv.trim()) return 'Please enter the CVV.'
-    }
-
-    return ''
+    if (paymentMethod === 'UPI') return { upiId: validateUpiId(values.upiId) }
+    if (paymentMethod === 'Card') return { demoCode: validateDemoCode(values.demoCode) }
+    return {}
   }
 
   const handlePayment = (event) => {
     event.preventDefault()
-    const validationMessage = validatePayment()
+    const validationErrors = validatePayment()
 
-    if (validationMessage) {
-      setError(validationMessage)
+    if (Object.values(validationErrors).some(Boolean)) {
+      setErrors(validationErrors)
       return
     }
 
-    setError('')
+    setErrors({})
     setIsProcessing(true)
 
     setTimeout(() => {
@@ -83,6 +87,12 @@ function Payment() {
   return (
     <div className="payment-page">
       <div className="container payment-page-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: categoryLabel, to: categoryPath },
+          { label: eventName, to: eventPath },
+          { label: 'Payment' },
+        ]} />
         <header className="payment-header">
           <p className="section-label">Secure checkout</p>
           <h1>Payment</h1>
@@ -90,12 +100,12 @@ function Payment() {
         </header>
 
         <div className="payment-layout">
-          <form className="payment-method-panel" onSubmit={handlePayment}>
+          <form className="payment-method-panel" onSubmit={handlePayment} noValidate>
             <div className="payment-panel-heading"><div><p className="section-label">Choose a method</p><h2>Payment Method</h2></div><span>DEMO PAYMENT</span></div>
             <div className="payment-options">
               {paymentOptions.map((option) => (
                 <label className={`payment-option ${paymentMethod === option.value ? 'active' : ''}`} key={option.value}>
-                  <input type="radio" name="paymentMethod" value={option.value} checked={paymentMethod === option.value} onChange={(event) => { setPaymentMethod(event.target.value); setError('') }} />
+                  <input type="radio" name="paymentMethod" value={option.value} checked={paymentMethod === option.value} onChange={(event) => { setPaymentMethod(event.target.value); setErrors({}) }} />
                   <span className="payment-radio" />
                   <span><strong>{option.label}</strong><small>{option.description}</small></span>
                 </label>
@@ -104,24 +114,41 @@ function Payment() {
 
             <div className="payment-form-area">
               {paymentMethod === 'UPI' && (
-                <label className="payment-field"><span>UPI ID</span><input type="text" value={upiId} onChange={(event) => setUpiId(event.target.value)} placeholder="yourname@upi" autoComplete="off" /></label>
+                <FormInput
+                  className="payment-field"
+                  label="Demo UPI ID"
+                  name="upiId"
+                  value={values.upiId}
+                  onChange={handleChange}
+                  placeholder="demo@upi"
+                  error={errors.upiId}
+                  required
+                  autoComplete="off"
+                />
               )}
 
               {paymentMethod === 'Card' && (
-                <div className="card-fields">
-                  <label className="payment-field card-number-field"><span>Card Number</span><input type="text" name="cardNumber" value={cardDetails.cardNumber} onChange={handleCardChange} placeholder="1234 5678 9012 3456" autoComplete="off" /></label>
-                  <label className="payment-field card-holder-field"><span>Card Holder Name</span><input type="text" name="cardHolder" value={cardDetails.cardHolder} onChange={handleCardChange} placeholder="Enter card holder name" autoComplete="off" /></label>
-                  <label className="payment-field"><span>Expiry Date</span><input type="text" name="expiry" value={cardDetails.expiry} onChange={handleCardChange} placeholder="MM/YY" autoComplete="off" /></label>
-                  <label className="payment-field"><span>CVV</span><input type="password" name="cvv" value={cardDetails.cvv} onChange={handleCardChange} placeholder="•••" autoComplete="off" /></label>
-                </div>
+                <FormInput
+                  className="payment-field"
+                  label="Demo approval code"
+                  name="demoCode"
+                  value={values.demoCode}
+                  onChange={handleChange}
+                  placeholder="VIBE-DEMO"
+                  error={errors.demoCode}
+                  required
+                  autoComplete="off"
+                />
               )}
 
               {paymentMethod === 'Cash' && <div className="cash-payment-note"><span aria-hidden="true">◌</span><p>You can pay at the venue according to the event's payment policy.</p></div>}
             </div>
 
-            {error && <p className="payment-error" role="alert">{error}</p>}
+            {Object.values(errors).some(Boolean) && (
+              <p className="form-error-summary" role="alert">Please correct the highlighted field before continuing.</p>
+            )}
             <button type="submit" className="primary-btn pay-now-button" disabled={isProcessing}>{isProcessing ? <><span className="payment-spinner" /> Processing Payment...</> : <>Pay ₹{total} <span aria-hidden="true">→</span></>}</button>
-            <button type="button" className="payment-back-button" disabled={isProcessing} onClick={() => navigate('/booking-summary', { state: bookingState })}>← Back to Booking Summary</button>
+            <button type="button" className="payment-back-button" disabled={isProcessing} onClick={() => navigate(summaryPath, { state: bookingState })}>← Back to Booking Summary</button>
           </form>
 
           <aside className="payment-order-summary">
@@ -134,7 +161,7 @@ function Payment() {
               <div><span>Booking Fee</span><strong>₹{bookingFee}</strong></div>
               <div className="payment-total"><span>Total</span><strong>₹{total}</strong></div>
             </div>
-            <p className="demo-payment-note">This is a simulated frontend payment for the VIBE college project. No payment details are sent or stored.</p>
+            <p className="demo-payment-note">This is a simulated frontend payment. Use only fictional demo values; no real payment details are needed, sent, or stored.</p>
           </aside>
         </div>
       </div>

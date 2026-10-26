@@ -1,58 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import Breadcrumbs from '../components/Breadcrumbs'
+import useJsonArray from '../hooks/useJsonArray'
 
 function ConcertDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [concert, setConcert] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [imageFailed, setImageFailed] = useState(false)
+  const [failedImage, setFailedImage] = useState('')
+  const { data: concerts, error, loading, retry } = useJsonArray('/concerts.json', 'concert details')
+  const concert = concerts?.find((item) => String(item.id) === String(id))
 
-  useEffect(() => {
-    const loadConcert = async () => {
-      setIsLoading(true)
-      setError('')
-      setConcert(null)
-      setImageFailed(false)
-
-      try {
-        const response = await fetch('/concerts.json')
-        if (!response.ok) throw new Error('Unable to load concert details.')
-
-        const concerts = await response.json()
-        const selectedConcert = concerts.find((item) => String(item.id) === String(id))
-
-        if (!selectedConcert) {
-          setError('not-found')
-        } else {
-          setConcert(selectedConcert)
-        }
-      } catch {
-        setError('load-error')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadConcert()
-  }, [id])
-
-  if (isLoading) {
+  if (loading) {
     return <div className="concert-detail-state container"><p className="section-label">Please wait</p><h1>Loading concert details...</h1></div>
   }
 
-  if (error === 'load-error') {
+  if (error) {
     return (
       <div className="concert-detail-state container">
         <p className="section-label">Something went wrong</p>
         <h1>Unable to load concert details.</h1>
+        <p role="alert">{error}</p>
+        <button type="button" className="primary-btn" onClick={retry}>Try Again</button>
         <button type="button" className="secondary-btn" onClick={() => navigate('/concerts')}>Back to Concerts</button>
       </div>
     )
   }
 
-  if (error === 'not-found' || !concert) {
+  if (!concert) {
     return (
       <div className="concert-detail-state container">
         <p className="section-label">404 / Concert</p>
@@ -68,19 +42,24 @@ function ConcertDetails() {
   return (
     <div className="concert-detail-page">
       <div className="container concert-detail-wrap">
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Concerts', to: '/concerts' },
+          { label: concert.name },
+        ]} />
         <button type="button" className="detail-back-button" onClick={() => navigate('/concerts')}>
           <span aria-hidden="true">←</span> Back to Concerts
         </button>
 
         <section className="concert-detail-hero">
           <div className="concert-detail-image-wrap">
-            {imageFailed ? (
+            {failedImage === concert.image ? (
               <div className="concert-detail-fallback" aria-label={`${concert.artist} concert placeholder`}>
                 <strong>{artistInitials}</strong>
                 <span>LIVE MUSIC</span>
               </div>
             ) : (
-              <img src={concert.image} alt={`${concert.artist} at ${concert.name}`} onError={() => setImageFailed(true)} />
+              <img src={concert.image} alt={`${concert.artist} at ${concert.name}`} onError={() => setFailedImage(concert.image)} />
             )}
             <div className="concert-detail-image-overlay" />
             <span className="concert-detail-category">{concert.category}</span>

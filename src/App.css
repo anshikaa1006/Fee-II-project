@@ -3099,6 +3099,22 @@
   color: #737385;
 }
 
+.payment-field input[aria-invalid='true'] {
+  border-color: #fb7185;
+}
+
+.form-input-error {
+  color: #fda4af;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.form-error-summary {
+  margin: 0;
+  color: #fda4af;
+  font-size: 0.82rem;
+}
+
 .card-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3972,6 +3988,73 @@
   text-align: center;
 }
 
+.breadcrumbs {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 1rem 0;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.breadcrumbs li + li::before {
+  margin-right: 0.55rem;
+  color: var(--accent);
+  content: '/';
+}
+
+.breadcrumbs a {
+  transition: color var(--transition);
+}
+
+.breadcrumbs a:hover {
+  color: var(--text);
+}
+
+.breadcrumbs [aria-current='page'] {
+  color: var(--text);
+}
+
+.not-found-page {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.not-found-page h1 {
+  max-width: 760px;
+  margin: 0.7rem 0 1rem;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.08em;
+}
+
+.not-found-page > p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.7rem;
+}
+
 @media (max-width: 980px) {
   .login-page {
     grid-template-columns: 1fr;
@@ -4010,5 +4093,9 @@
 
   .login-visual strong {
     font-size: 3.1rem;
+  }
+
+  .breadcrumbs {
+    width: min(100% - 28px, 1180px);
   }
 }
