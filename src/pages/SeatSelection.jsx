@@ -18,7 +18,6 @@ function SeatSelection() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [limitMessage, setLimitMessage] = useState('')
-  const [imageFailed, setImageFailed] = useState(false)
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -27,7 +26,6 @@ function SeatSelection() {
       setEvent(null)
       setSelectedSeats(location.state?.selectedSeats || [])
       setLimitMessage('')
-      setImageFailed(false)
 
       try {
         const response = await fetch(isComedyRoute ? '/comedy.json' : '/concerts.json')

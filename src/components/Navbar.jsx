@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const navigationLinks = [
   { label: 'Home', to: '/' },
@@ -10,36 +11,14 @@ const navigationLinks = [
   { label: 'Login', to: '/login' },
 ]
 
-const readUser = () => {
-  try {
-    const storedUser = JSON.parse(localStorage.getItem('vibeUser'))
-    return storedUser?.isLoggedIn ? storedUser : null
-  } catch {
-    return null
-  }
-}
-
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState(readUser)
-
-  useEffect(() => {
-    const syncUser = () => setUser(readUser())
-    window.addEventListener('vibe-auth-change', syncUser)
-    window.addEventListener('storage', syncUser)
-
-    return () => {
-      window.removeEventListener('vibe-auth-change', syncUser)
-      window.removeEventListener('storage', syncUser)
-    }
-  }, [])
+  const { user, logout, isAuthenticated } = useAuth()
 
   const closeMenu = () => setIsMenuOpen(false)
 
   const handleLogout = () => {
-    localStorage.removeItem('vibeUser')
-    setUser(null)
-    window.dispatchEvent(new Event('vibe-auth-change'))
+    logout()
     closeMenu()
   }
 
@@ -65,7 +44,7 @@ function Navbar() {
         </button>
 
         <nav id="primary-navigation" className={`primary-navigation ${isMenuOpen ? 'is-open' : ''}`}>
-          {navigationLinks.filter((link) => !(user && link.to === '/login')).map((link) => (
+          {navigationLinks.filter((link) => !(isAuthenticated && link.to === '/login')).map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -77,7 +56,7 @@ function Navbar() {
             </NavLink>
           ))}
           {user && <span className="nav-greeting">Hi, {user.name}</span>}
-          {user && <button type="button" className="nav-logout" onClick={handleLogout}>Logout</button>}
+          {isAuthenticated && <button type="button" className="nav-logout" onClick={handleLogout}>Logout</button>}
         </nav>
       </div>
     </header>

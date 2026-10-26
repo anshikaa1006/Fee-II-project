@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import FormField from '../components/FormField'
+import { useAuth } from '../context/AuthContext'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { login } = useAuth()
   const [form, setForm] = useState({ name: '', email: '' })
   const [errors, setErrors] = useState({})
 
@@ -30,14 +33,10 @@ function Login() {
       return
     }
 
-    const user = {
+    login({
       name: form.name.trim(),
       email: form.email.trim(),
-      isLoggedIn: true,
-    }
-
-    localStorage.setItem('vibeUser', JSON.stringify(user))
-    window.dispatchEvent(new Event('vibe-auth-change'))
+    })
     navigate(location.state?.from || '/')
   }
 
@@ -56,8 +55,27 @@ function Login() {
         <p className="login-subtitle">Sign in to continue booking your favourite events.</p>
 
         <form className="login-form" onSubmit={handleLogin} noValidate>
-          <label className="login-field"><span>Name</span><input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Enter your name" autoComplete="name" aria-invalid={Boolean(errors.name)} />{errors.name && <small>{errors.name}</small>}</label>
-          <label className="login-field"><span>Email</span><input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" autoComplete="email" aria-invalid={Boolean(errors.email)} />{errors.email && <small>{errors.email}</small>}</label>
+          <FormField
+            label="Name"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            autoComplete="name"
+            error={errors.name}
+            required
+          />
+          <FormField
+            label="Email"
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            autoComplete="email"
+            error={errors.email}
+            required
+          />
           <button type="submit" className="primary-btn login-button">Login <span aria-hidden="true">→</span></button>
         </form>
 

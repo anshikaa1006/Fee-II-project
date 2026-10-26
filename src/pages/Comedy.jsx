@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ComedyCard from '../components/ComedyCard'
 
 const defaultFilters = {
@@ -13,7 +14,7 @@ function Comedy() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const fetchComedy = async () => {
+  const loadComedy = useCallback(async () => {
     setLoading(true)
     setError('')
 
@@ -28,11 +29,11 @@ function Comedy() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchComedy()
-  }, [])
+    void loadComedy()
+  }, [loadComedy])
 
   const filteredShows = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -72,7 +73,7 @@ function Comedy() {
           <section className="comedy-listing-error">
             <p className="section-label">Something went wrong</p>
             <h1>Unable to load comedy shows.</h1>
-            <button type="button" className="primary-btn" onClick={fetchComedy}>Try Again</button>
+            <button type="button" className="primary-btn" onClick={() => void loadComedy()}>Try Again</button>
           </section>
         </div>
       </div>
